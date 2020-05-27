@@ -69,10 +69,10 @@ def fmgr_web_url_filter(fmgr, paramgram):
         url = '/pm/config/adom/{adom}/obj/webfilter/urlfilter/{name}'.format(adom=adom, name=paramgram["name"])
         datagram = {}
 
-    elif mode == "get" and "id" in paramgram:
+    elif mode == "get" and "id" is not None:
         url = '/pm/config/adom/{adom}/obj/webfilter/urlfilter/{id}'.format(adom=adom,id=paramgram["id"])
         datagram = {}
-    elif mode == "get" and "name" in paramgram:
+    elif mode == "get" and "name" is not None:
         url = '/pm/config/adom/{adom}/obj/webfilter/urlfilter'.format(adom=adom)
         paramgram["filter"] = [ "name", "==", paramgram["name"]]
         datagram = scrub_dict(prepare_dict(paramgram))
