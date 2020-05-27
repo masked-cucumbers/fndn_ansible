@@ -71,7 +71,7 @@ def fmgr_web_url_filter(fmgr, paramgram):
 
     elif mode == "get":
         url = '/pm/config/adom/{adom}/obj/webfilter/urlfilter'.format(adom=adom)
-        datagram = {}
+        datagram = scrub_dict(prepare_dict(paramgram))
 
     response = fmgr.process_request(url, datagram, paramgram["mode"])
 
