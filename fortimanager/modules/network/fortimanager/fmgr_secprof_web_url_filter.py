@@ -69,9 +69,16 @@ def fmgr_web_url_filter(fmgr, paramgram):
         url = '/pm/config/adom/{adom}/obj/webfilter/urlfilter/{name}'.format(adom=adom, name=paramgram["name"])
         datagram = {}
 
+    elif mode == "get" and "id" in paramgram:
+        url = '/pm/config/adom/{adom}/obj/webfilter/urlfilter/{id}'.format(adom=adom,id=paramgram["id"])
+        datagram = {}
+    elif mode == "get" and "name" in paramgram:
+        url = '/pm/config/adom/{adom}/obj/webfilter/urlfilter'.format(adom=adom)
+        paramgram["filter"] = [ "name", "==", paramgram["name"]]
+        datagram = scrub_dict(prepare_dict(paramgram))
     elif mode == "get":
         url = '/pm/config/adom/{adom}/obj/webfilter/urlfilter'.format(adom=adom)
-        datagram = scrub_dict(prepare_dict(paramgram))
+        datagram = {}
 
     response = fmgr.process_request(url, datagram, paramgram["mode"])
 
@@ -144,7 +151,7 @@ def main():
 
     try:
 
-        results = fmgr_web_url_filter(fmgr, paramgram)
+        results = fmgr_web_url_filter(\, paramgram)
         fmgr.govern_response(module=module, results=results,
                              ansible_facts=fmgr.construct_ansible_facts(results, module.params, paramgram))
 
