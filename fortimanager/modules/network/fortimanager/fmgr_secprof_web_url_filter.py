@@ -136,7 +136,7 @@ def main():
     else:
         module.fail_json(**FAIL_SOCKET_MSG)
 
-    list_overrides = ['ftgd-wf', 'override', 'url-extraction', 'web', 'youtube-channel-filter']
+    list_overrides = ['entries']
     paramgram = fmgr.tools.paramgram_child_list_override(list_overrides=list_overrides,
                                                          paramgram=paramgram, module=module)
 
