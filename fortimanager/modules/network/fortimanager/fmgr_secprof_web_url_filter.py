@@ -25,9 +25,106 @@ ANSIBLE_METADATA = {'status': ['preview'],
 
 DOCUMENTATION = '''
 ---
+module: fmgr_secprof_web
+version_added: "2.8"
+notes:
+    - Full Documentation at U(https://ftnt-ansible-docs.readthedocs.io/en/latest/).
+author:
+    - Pierre-Alain CRUTCHET
+short_description: Manage web URL filter in FortiManager
+description:
+  -  Manage web URL filter in FortiManager through playbooks using the FMG API
+
+options:
+  adom:
+    description:
+      - The ADOM the configuration should belong to.
+    required: false
+    default: root
+
+  mode:
+    description:
+      - Sets one of three modes for managing the object.
+      - Allows use of soft-adds instead of overwriting existing values
+    choices: ['get', 'add', 'set', 'delete', 'update']
+    required: false
+    default: get
+  
+  comment:
+    description:
+      - Optional comments.
+    required: false
+  
+  name:
+    description:
+      - Name of the web url filter
+      - If specified with get mode, the result returned will only contain the web url list having an exact match on the name field
+    required: false
+    
+  id:
+    description:
+      - Id of the web url filter
+      - If specified with get mode, the result returned is the web url filter with the specified id 
+    required: false
+  
+  one_arm_ips_urlfilter:
+    description:
+      - Enable/disable DNS resolver for one-arm IPS URL filter operation.
+      - choice | disable | Disable setting.
+      - choice | enable | Enable setting.
+    required: false
+    choices: ["disable", "enable"]
+  
+  ip-addr-block:
+    description:
+      - Enable/disable blocking URLs when the hostname appears as an IP address.
+      - choice | disable | Disable setting.
+      - choice | enable | Enable setting.
+    required: false
+    choices: ["disable", "enable"]
+  
+  entries:
+    description:
+      - EXPERTS ONLY! KNOWLEDGE OF FMGR JSON API IS REQUIRED!
+      - List of multiple child objects to be added. Expects a list of dictionaries.
+      - Dictionaries must use FortiManager API parameters, not the ansible ones listed below.
+      - If submitted, all other prefixed sub-parameters ARE IGNORED.
+      - This object is MUTUALLY EXCLUSIVE with its options.
+      - We expect that you know what you are doing with these list parameters, and are leveraging the JSON API Guide.
+      - WHEN IN DOUBT, USE THE SUB OPTIONS BELOW INSTEAD TO CREATE OBJECTS WITH MULTIPLE TASKS
+    required: false
+  
+  
 '''
 
 EXAMPLES = '''
+- name: update webfilter URL list
+  hosts: Fortimanager
+  connection: httpapi
+  gather_facts: no
+  tasks:
+    - name: display target webfilter and save result
+      fmgr_secprof_web_url_filter:
+        adom: "{{ adom }}"
+        mode: "get"
+        name: "{{webfilter}}"
+      register: result
+
+    - name: import webfilter param from a file
+      include_vars:
+        dir: /path/to/webfilters/
+        files_matching: "{{webfilter}}.yml"
+        name: webfilter_param
+
+    - name: add or update the webfilter
+      fmgr_secprof_web_url_filter:
+        adom: "{{ adom }}"
+        mode: "set"
+        id: "{{result.results.0.id}}"
+        name: "{{webfilter_param.name}}"
+        one_arm_ips_urlfilter: "{{webfilter_param.one_arm_ips_urlfilter}}"
+        ip_addr_block: "{{webfilter_param.ip_addr_block}}"
+        entries: "{{ webfilter_param.entries }}"
 '''
 
 RETURN = """
@@ -66,11 +163,11 @@ def fmgr_web_url_filter(fmgr, paramgram):
     # EVAL THE MODE PARAMETER FOR DELETE
     elif mode == "delete":
         # SET THE CORRECT URL FOR DELETE
-        url = '/pm/config/adom/{adom}/obj/webfilter/urlfilter/{name}'.format(adom=adom, name=paramgram["name"])
+        url = '/pm/config/adom/{adom}/obj/webfilter/urlfilter/{id}'.format(adom=adom, id=paramgram["id"])
         datagram = {}
 
     elif mode == "get" and paramgram["id"] is not None:
-        url = '/pm/config/adom/{adom}/obj/webfilter/urlfilter/{id}'.format(adom=adom,id=paramgram["id"])
+        url = '/pm/config/adom/{adom}/obj/webfilter/urlfilter/{id}'.format(adom=adom, id=paramgram["id"])
         datagram = {}
     elif mode == "get" and paramgram["name"] is not None:
         url = '/pm/config/adom/{adom}/obj/webfilter/urlfilter'.format(adom=adom)
